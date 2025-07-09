@@ -1,0 +1,144 @@
+MOV P2,#11111100B  
+MOV P1,#10111111B ; bit 6 denotes sump level (0-full, 1-empty) 
+MOV A,#00000000B 
+MAIN:ACALL SMPCK  
+MOV A,P2  
+CJNE A,#11111111B,LABEL1 ;full 
+SETB P1.1 
+SETB P1.2 
+SETB P1.3 
+SETB P1.4 
+CLR P1.0  
+setb P3.0   ;motor off 
+LABEL1:MOV A,P2 
+CJNE A,#11111110B,LABEL2 ;3/4 
+SETB P1.0 
+SETB P1.2 
+SETB P1.3 
+SETB P1.4 
+CLR P1.1  
+LABEL2:MOV A,P2 
+CJNE A,#11111100B,LABEL3 ;1/2 
+SETB P1.0 
+SETB P1.1 
+SETB P1.3 
+SETB P1.4 
+CLR P1.2  
+LABEL3:MOV A,P2 
+CJNE A,#11111000B,LABEL4 ;1/4 
+SETB P1.0 
+SETB P1.1 
+SETB P1.2 
+SETB P1.4 
+CLR P1.0  
+clr p1.7 
+setb p1.6 
+JB P1.6,LABEL4  
+clr P3.0  ;motor on 
+LABEL4:MOV A,P2 
+CJNE A,#11110000B,MAIN ;empty 
+SETB P1.0 
+SETB P1.1 
+SETB P1.2 
+SETB P1.3 
+CLR P1.4  
+JB P1.6,MAIN  
+clr P3.0 ;motor on 
+MOV 2EH, #'U' 
+MOV 2FH, #'-' 
+MOV 30H, #'O' 
+MOV 31H, #'T' 
+MOV 32H, #'=' 
+MOV 33H, #'3' 
+MOV 34H, #'/' 
+MOV 35H, #'4' 
+MOV 36H, #',' 
+MOV 37H, #'S' 
+MOV 38H, #'T' 
+MOV 39H, #'=' 
+MOV 3AH, #'E' 
+MOV 3BH, #'M' 
+MOV 3CH, #'T' 
+MOV 4DH, #0  
+CLR P1.3 
+CLR P1.7  
+CLR P1.6 
+SETB P1.5  
+CLR P1.4 
+SETB P1.2  
+CLR P1.2 
+CALL delay 
+SETB P1.2  
+CLR P1.2 
+SETB P1.7 
+SETB P1.2  
+CLR P1.2  
+CALL delay 
+CLR P1.7  
+CLR P1.6 
+CLR P1.5  
+CLR P1.4  
+SETB P1.2  
+CLR P1.2  
+SETB P1.6  
+SETB P1.5  
+SETB P1.2  
+CLR P1.2  
+CALL delay  
+CLR P1.7  
+CLR P1.6 
+CLR P1.5 
+CLR P1.4  
+SETB P1.2  
+CLR P1.2 
+SETB P1.7 
+SETB P1.6 
+SETB P1.5 
+SETB P1.4  
+SETB P1.2  
+CLR P1.2 
+CALL delay  
+SETB P1.3  
+MOV R1, #2EH  
+loop: 
+MOV A, @R1  
+JZ finish  
+CALL sendCharacter  
+INC R1  
+JMP loop 
+finish: 
+JMP $ 
+sendCharacter: 
+MOV C, ACC.7 
+MOV P1.7, C  
+MOV C, ACC.6 
+MOV P1.6, C  
+MOV C, ACC.5  
+MOV P1.5, C  
+MOV C, ACC.4  
+MOV P1.4, C 
+SETB P1.2  
+CLR P1.2  
+MOV C, ACC.3 
+MOV P1.7, C  
+MOV C, ACC.2 
+MOV P1.6, C  
+MOV C, ACC.1  
+MOV P1.5, C 
+MOV C, ACC.0  
+MOV P1.4, C 
+SETB P1.2 
+CLR P1.2  
+CALL delay 
+delay: 
+MOV R0, #50 
+DJNZ R0,$ 
+ret 
+JMP MAIN 
+SMPCK:JB P1.6,LABEL5 ; sump   
+SETB P1.7  
+SJMP LABEL6 
+LABEL5:setb P3.0 ;motor off 
+CLR P1.7 ; sump low indicator 
+LABEL6:RET 
+END
